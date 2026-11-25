@@ -1,0 +1,68 @@
+{% extends 'base.html' %}{% block title %}Evaluate{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="page-heading mb-0"><i class="bi bi-pencil-square"></i> Evaluate Student</h2>
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('examiner.slot_bookings', sid=b.slot_id) }}">
+    <i class="bi bi-arrow-left me-1"></i>Back to Slot
+  </a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em;">Student</div>
+        <div class="fw-bold">{{ b.student }}</div>
+        <div class="text-muted" style="font-size:0.82rem;">{{ b.student_email }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em;">Examination</div>
+        <div class="fw-bold">{{ b.exam }}</div>
+        <div class="text-muted" style="font-size:0.82rem;">{{ b.slot_date }} {{ b.start_time }}</div>
+      </div>
+      <div class="col-md-4">
+        <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em;">Total Marks</div>
+        <div class="fw-bold" style="font-size:1.3rem; color:var(--emp-primary)">{{ b.max_marks }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form method="post" class="card card-body col-lg-8">
+  <h6 class="fw-bold mb-3"><i class="bi bi-list-check me-1"></i>Rubric Scores</h6>
+
+  {% for r in rubrics %}
+  <div class="row mb-3 align-items-center p-2 rounded" style="background:#f8fafc; border:1px solid var(--emp-border);">
+    <div class="col-md-7">
+      <div class="fw-semibold">{{ r.criterion }}</div>
+      {% if r.description %}
+      <div class="text-muted" style="font-size:0.80rem;">{{ r.description }}</div>
+      {% endif %}
+      <div class="text-muted" style="font-size:0.78rem;">Weight: {{ '%g'|format(r.weightage) }}</div>
+    </div>
+    <div class="col-md-5 mt-2 mt-md-0">
+      <div class="input-group">
+        <input type="number" step="any" min="0" max="{{ r.max_marks }}"
+               name="m_{{ r.id }}" class="form-control"
+               value="{{ scores.get(r.id, '') }}" placeholder="0" required>
+        <span class="input-group-text">/ {{ '%g'|format(r.max_marks) }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="mb-3 mt-2">
+    <label class="form-label"><i class="bi bi-chat-left-text me-1"></i>Remarks / Feedback (optional)</label>
+    <textarea name="remarks" rows="3" class="form-control" placeholder="Any comments for the student...">{{ result.remarks if result and result.remarks }}</textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-success px-4">
+      <i class="bi bi-check2-circle me-1"></i>Submit Marks
+    </button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('examiner.slot_bookings', sid=b.slot_id) }}">Cancel</a>
+  </div>
+</form>
+
+{% endblock %}

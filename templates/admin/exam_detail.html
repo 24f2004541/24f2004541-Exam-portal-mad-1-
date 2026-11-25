@@ -1,0 +1,172 @@
+{% extends 'base.html' %}{% from '_m.html' import badge, post %}{% block title %}{{ exam.name }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="page-heading mb-1"><i class="bi bi-clipboard-check"></i> {{ exam.name }} {{ badge(exam.status) }}</h2>
+    <div class="text-muted" style="font-size:0.88rem;">
+      <span class="fw-semibold">{{ exam.course_code }}</span> – {{ exam.course_name }}
+      &nbsp;·&nbsp;{{ exam.exam_type }}
+      &nbsp;·&nbsp;<i class="bi bi-clock me-1"></i>{{ exam.duration }} min
+      &nbsp;·&nbsp;<i class="bi bi-trophy me-1"></i>{{ exam.max_marks }} marks
+      {% if exam.venue %}&nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ exam.venue }}{% endif %}
+    </div>
+    <div class="text-muted mt-1" style="font-size:0.82rem;">
+      Slot creation: {{ exam.slot_start }} → {{ exam.slot_end }}
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      Booking: {{ exam.book_start }} → {{ exam.book_end }}
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.exam_form', eid=exam.id) }}">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+    {{ post(url_for('admin.exam_delete', eid=exam.id), '🗑 Delete', 'btn-outline-danger', 'Delete this examination? This cannot be undone.') }}
+  </div>
+</div>
+
+<!-- Phase Controls -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-arrow-right-circle text-primary"></i> Phase Controls
+  </div>
+  <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+    {% for s, label, cls in [
+      ('Slot Creation',  'Open Slot Creation', 'success'),
+      ('Draft',          'Close Slot Creation', 'outline-secondary'),
+      ('Booking Open',   'Open Booking',        'success'),
+      ('Closed',         'Close Booking',       'outline-danger'),
+      ('Completed',      'Mark Completed',      'primary')
+    ] %}
+    {{ post(url_for('admin.exam_status', eid=exam.id), label, 'btn-' ~ cls, '', '<input type="hidden" name="status" value="' ~ s ~ '">') }}
+    {% endfor %}
+    <span class="text-muted" style="font-size:0.85rem;">|</span>
+    {{ post(url_for('admin.exam_publish', eid=exam.id),
+        '👁 Unpublish Results' if exam.results_published else '📢 Publish Results',
+        'btn-warning') }}
+  </div>
+  <div class="card-body border-top" style="font-size:0.82rem; color:var(--emp-muted);">
+    <i class="bi bi-info-circle me-1"></i>
+    Examiners can create slots only when status is <strong>Slot Creation</strong> and today falls within the slot-creation dates.
+    Students can book only during <strong>Booking Open</strong> within the booking window.
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Rubric -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-list-check text-primary"></i> Rubric
+        <span class="text-muted ms-auto" style="font-size:0.82rem;">Total: {{ '%g'|format(rubric_total) }} / {{ exam.max_marks }}</span>
+      </div>
+      <table class="table mb-0">
+        <thead>
+          <tr><th>Criterion</th><th>Max</th><th>Weight</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for r in rubrics %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ r.criterion }}</div>
+              {% if r.description %}<div class="text-muted" style="font-size:0.80rem;">{{ r.description }}</div>{% endif %}
+            </td>
+            <td>{{ '%g'|format(r.max_marks) }}</td>
+            <td>{{ '%g'|format(r.weightage) }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.rubric_edit', rid=r.id) }}">Edit</a>
+              {{ post(url_for('admin.rubric_delete', rid=r.id), '✕', 'btn-outline-danger', 'Remove this criterion?') }}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-muted text-center py-3">No criteria added yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <!-- Add Criterion Inline -->
+      <form method="post" action="{{ url_for('admin.rubric_add', eid=exam.id) }}" class="card-body border-top row g-2">
+        <div class="col-12">
+          <input name="criterion" class="form-control form-control-sm" placeholder="Criterion name" required>
+        </div>
+        <div class="col-4">
+          <input type="number" step="any" min="0.01" name="max_marks" class="form-control form-control-sm" placeholder="Max marks" required>
+        </div>
+        <div class="col-4">
+          <input type="number" step="any" min="0" name="weightage" class="form-control form-control-sm" placeholder="Weightage">
+        </div>
+        <div class="col-4">
+          <button class="btn btn-primary btn-sm w-100"><i class="bi bi-plus"></i> Add</button>
+        </div>
+        <div class="col-12">
+          <input name="description" class="form-control form-control-sm" placeholder="Description (optional)">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assigned Examiners -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-person-badge text-green" style="color:var(--emp-success);"></i> Assigned Examiners
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for u in assigned %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold">{{ u.name }}</div>
+            <div class="text-muted" style="font-size:0.80rem;">{{ u.email }}</div>
+          </div>
+          {{ post(url_for('admin.exam_unassign', eid=exam.id, uid=u.id), 'Remove', 'btn-outline-danger', 'Remove this examiner from the exam?') }}
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">No examiners assigned yet.</li>
+        {% endfor %}
+      </ul>
+      <!-- Assign Examiner -->
+      {% if unassigned %}
+      <form method="post" action="{{ url_for('admin.exam_assign', eid=exam.id) }}" class="card-body border-top d-flex gap-2">
+        <select name="examiner_id" class="form-select form-select-sm">
+          {% for u in unassigned %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> Assign</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Slots -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-calendar3 text-orange" style="color:var(--emp-warning);"></i> Exam Slots
+        <span class="ms-auto badge badge-booking">{{ slots|length }} total</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Examiner</th><th>Date</th><th>Time</th><th>Booked</th><th>Location</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for s in slots %}
+            <tr>
+              <td class="fw-semibold">{{ s.examiner }}</td>
+              <td>{{ s.slot_date }}</td>
+              <td class="text-muted">{{ s.start_time }}–{{ s.end_time }}</td>
+              <td><span class="fw-semibold">{{ s.capacity - s.available }}</span> / {{ s.capacity }}</td>
+              <td class="text-muted">{{ s.location or '—' }}</td>
+              <td>{{ badge(s.status) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">No slots created yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

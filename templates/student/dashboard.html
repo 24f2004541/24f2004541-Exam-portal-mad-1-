@@ -1,0 +1,143 @@
+{% extends 'base.html' %}{% from '_m.html' import badge, post %}{% block title %}Student{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="page-heading mb-0"><i class="bi bi-house"></i> Welcome, {{ g.user.name }}!</h2>
+  <span class="text-muted" style="font-size:0.85rem;"><i class="bi bi-mortarboard me-1"></i>Student Portal</span>
+</div>
+
+<div class="row g-4">
+
+  <!-- Available Exams -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-clipboard-check text-primary"></i> Available Examinations
+        <span class="badge badge-booking ms-auto">Booking Open</span>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for e in exams %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold">{{ e.course_code }} – {{ e.name }}</div>
+            <div class="text-muted" style="font-size:0.80rem;">
+              <i class="bi bi-clock me-1"></i>Book by {{ e.book_end }}
+            </div>
+          </div>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.exam_detail', eid=e.id) }}">
+            View <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-info-circle me-1"></i>No exams open for booking right now.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Available Slots -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-calendar3 text-success"></i> Available Slots
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for s in slots %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold">{{ s.exam }}</div>
+            <div class="text-muted" style="font-size:0.80rem;">
+              <i class="bi bi-calendar-event me-1"></i>{{ s.slot_date }}
+              &nbsp;{{ s.start_time }}–{{ s.end_time }}
+              &nbsp;·&nbsp;<i class="bi bi-people me-1"></i>{{ s.available }} seat(s) left
+            </div>
+          </div>
+          {{ post(url_for('student.book', sid=s.id), 'Book', 'btn-success btn-sm') }}
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-calendar-x me-1"></i>No open slots available at the moment.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Upcoming Exams -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-alarm text-warning"></i> Upcoming Examinations
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for b in upcoming %}
+        <li class="list-group-item">
+          <div class="fw-semibold">{{ b.exam }}</div>
+          <div class="text-muted" style="font-size:0.80rem;">
+            <i class="bi bi-calendar-event me-1"></i>{{ b.slot_date }}
+            &nbsp;{{ b.start_time }}–{{ b.end_time }}
+            {% if b.location %}&nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ b.location }}{% endif %}
+          </div>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-calendar-check me-1"></i>Nothing coming up yet.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Published Results -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-bar-chart-line text-purple" style="color:#7c3aed;"></i> Published Results
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for r in results %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">{{ r.exam }}</span>
+          <span class="fw-bold" style="color:var(--emp-primary)">{{ '%g'|format(r.total) }} / {{ r.max_marks }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-hourglass-split me-1"></i>No results published yet.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Active Bookings -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-ticket-perforated text-primary"></i> My Active Bookings
+        <span class="badge badge-booking ms-auto">{{ booked|length }}</span>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for b in booked %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold">{{ b.exam }}</div>
+            <div class="text-muted" style="font-size:0.80rem;">
+              <i class="bi bi-calendar-event me-1"></i>{{ b.slot_date }} {{ b.start_time }}
+              &nbsp;·&nbsp;<i class="bi bi-person-badge me-1"></i>{{ b.examiner }}
+            </div>
+          </div>
+          {{ post(url_for('student.cancel', bid=b.id), 'Cancel Booking', 'btn-outline-danger btn-sm', 'Are you sure you want to cancel this booking?') }}
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-ticket-detailed me-1"></i>You have no active bookings.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

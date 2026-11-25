@@ -1,0 +1,67 @@
+{% extends 'base.html' %}{% block title %}Reschedule Booking{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="page-heading mb-0"><i class="bi bi-arrow-left-right"></i> Reschedule Booking</h2>
+  <a href="{{ url_for('admin.bookings') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<!-- Current Booking -->
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-ticket-perforated me-1"></i>Current Booking</div>
+  <div class="card-body row g-3">
+    <div class="col-md-3">
+      <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase;">Student</div>
+      <div class="fw-semibold">{{ b.student }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase;">Examination</div>
+      <div class="fw-semibold">{{ b.exam }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase;">Current Slot</div>
+      <div class="fw-semibold">{{ b.slot_date }} {{ b.start_time }}–{{ b.end_time }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted" style="font-size:0.78rem; text-transform:uppercase;">Examiner</div>
+      <div class="fw-semibold">{{ b.examiner }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- New Slot Selector -->
+<form method="post" class="card">
+  <div class="card-header"><i class="bi bi-calendar3 me-1"></i>Pick a New Slot</div>
+  <div class="card-body">
+    {% if options %}
+    <div class="table-responsive mb-3">
+      <table class="table table-hover mb-0" style="font-size:0.88rem;">
+        <thead>
+          <tr><th></th><th>Date</th><th>Time</th><th>Examiner</th><th>Seats Available</th><th>Location</th></tr>
+        </thead>
+        <tbody>
+          {% for s in options %}
+          <tr>
+            <td><input type="radio" name="slot_id" value="{{ s.id }}" required></td>
+            <td>{{ s.slot_date }}</td>
+            <td>{{ s.start_time }}–{{ s.end_time }}</td>
+            <td>{{ s.examiner }}</td>
+            <td class="text-success fw-semibold">{{ s.available }}</td>
+            <td class="text-muted">{{ s.location or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-primary">
+      <i class="bi bi-check2-circle me-1"></i>Confirm Reschedule
+    </button>
+    {% else %}
+    <p class="text-muted mb-0">No other available slots for this exam right now.</p>
+    {% endif %}
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}{% from '_m.html' import badge %}{% block title %}All Slots{% endblock %}
+{% block content %}
+
+<h2 class="page-heading mb-4"><i class="bi bi-calendar3"></i> All Exam Slots</h2>
+
+<div class="table-wrapper">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Examination</th>
+        <th>Examiner</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Booked / Cap.</th>
+        <th>Location</th>
+        <th>Exam Status</th>
+        <th>Slot Status</th>
+        <th>Reassign</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in slots %}
+      <tr>
+        <td class="text-muted">{{ s.id }}</td>
+        <td class="fw-semibold">{{ s.exam }}</td>
+        <td>{{ s.examiner }}</td>
+        <td>{{ s.slot_date }}</td>
+        <td class="text-muted">{{ s.start_time }}–{{ s.end_time }}</td>
+        <td>
+          <span class="fw-semibold">{{ s.capacity - s.available }}</span>
+          <span class="text-muted">/ {{ s.capacity }}</span>
+        </td>
+        <td class="text-muted">{{ s.location or '—' }}</td>
+        <td>{{ badge(s.exam_status) }}</td>
+        <td>{{ badge(s.status) }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.slot_examiner', sid=s.id) }}" class="d-flex gap-1">
+            <select name="examiner_id" class="form-select form-select-sm" style="max-width:160px;">
+              {% for x in examiners %}
+              <option value="{{ x.id }}" {% if x.id == s.examiner_id %}selected{% endif %}>{{ x.name }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-outline-secondary">Switch</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="10" class="text-center text-muted py-4">
+          <i class="bi bi-calendar-x d-block mb-2" style="font-size:2rem;"></i>
+          No slots created yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

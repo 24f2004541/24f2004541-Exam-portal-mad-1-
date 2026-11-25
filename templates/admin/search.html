@@ -1,0 +1,56 @@
+{% extends 'base.html' %}{% from '_m.html' import badge %}{% block title %}Search{% endblock %}
+{% block content %}
+
+<h2 class="page-heading mb-3"><i class="bi bi-search"></i> Search</h2>
+
+<form method="get" class="card card-body mb-4 d-flex flex-row flex-wrap gap-2 align-items-end">
+  <div class="flex-grow-1">
+    <label class="form-label mb-1" style="font-size:0.82rem;">Search term</label>
+    <input name="q" class="form-control" placeholder="Name, email, roll no., course..." value="{{ term }}" autofocus>
+  </div>
+  <div>
+    <label class="form-label mb-1" style="font-size:0.82rem;">Filter by</label>
+    <select name="type" class="form-select">
+      {% for v, label in [('all','Everything'), ('students','Students'), ('examiners','Examiners'), ('exams','Examinations'), ('bookings','Bookings')] %}
+      <option value="{{ v }}" {% if v == kind %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <button class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
+  </div>
+</form>
+
+{% if term %}
+  {% for section, rows in res.items() %}
+  <div class="section-title"><i class="bi bi-chevron-right"></i> {{ section }} ({{ rows|length }})</div>
+  {% if rows %}
+  <div class="table-wrapper mb-4">
+    <table class="table table-hover mb-0" style="font-size:0.88rem;">
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          {% for col in r.keys() %}
+          <td>{{ r[col] or '—' }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted mb-4" style="font-size:0.88rem;">No {{ section.lower() }} found.</p>
+  {% endif %}
+  {% endfor %}
+
+  {% if not res %}
+  <div class="card">
+    <div class="card-body text-center text-muted py-5">
+      <i class="bi bi-search d-block mb-2" style="font-size:2.5rem;"></i>
+      No results found for <strong>"{{ term }}"</strong>.
+    </div>
+  </div>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

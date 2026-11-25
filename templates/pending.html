@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block content %}
+<div class="pending-banner">
+  <div style="font-size:3rem; margin-bottom:1rem;">⏳</div>
+  <h4 class="fw-bold mb-2">Account Pending Approval</h4>
+  <p class="text-muted mb-3">
+    Your examiner account is currently <strong>{{ g.user.status }}</strong>. 
+    The admin will review your registration and activate your account shortly.
+  </p>
+  <p class="mb-0" style="font-size:0.85rem; color:var(--emp-muted)">
+    <i class="bi bi-info-circle me-1"></i>
+    You'll be able to access your dashboard once your account is approved.
+  </p>
+</div>
+{% endblock %}

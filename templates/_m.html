@@ -1,0 +1,25 @@
+{% macro badge(s) %}
+{% set cls = {
+  'Draft':         'badge-draft',
+  'Slot Creation': 'badge-slot',
+  'Booking Open':  'badge-booking',
+  'Closed':        'badge-closed',
+  'Completed':     'badge-completed',
+  'Available':     'badge-available',
+  'Full':          'badge-full',
+  'Cancelled':     'badge-cancelled',
+  'Booked':        'badge-booked',
+  'active':        'badge-active',
+  'pending':       'badge-pending',
+  'inactive':      'badge-inactive',
+  'Active':        'badge-active',
+  'Inactive':      'badge-inactive'
+} %}
+<span class="badge {{ cls.get(s, 'badge-draft') }}">{{ s }}</span>
+{% endmacro %}
+
+{% macro post(url, label, cls='btn-outline-primary', confirm='', extra='') %}
+<form method="post" action="{{ url }}" class="d-inline" {% if confirm %}onsubmit="return confirm('{{ confirm }}')"{% endif %}>
+  {{ extra|safe }}<button class="btn btn-sm {{ cls }}">{{ label }}</button>
+</form>
+{% endmacro %}

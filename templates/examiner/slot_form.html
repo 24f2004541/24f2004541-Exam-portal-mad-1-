@@ -1,0 +1,61 @@
+{% extends 'base.html' %}{% block title %}{{ 'Edit Slot' if slot else 'New Slot' }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="page-heading mb-0">
+    <i class="bi bi-calendar-plus"></i> {{ 'Edit Slot' if slot else 'Create New Slot' }}
+  </h2>
+  <a href="{{ url_for('examiner.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Cancel
+  </a>
+</div>
+
+<form method="post" class="card card-body col-lg-7" style="border-radius:16px;">
+  <div class="mb-3">
+    <label class="form-label"><i class="bi bi-clipboard-check me-1"></i>Examination</label>
+    {% if slot %}
+      <input class="form-control" value="{{ slot.exam }}" disabled>
+    {% else %}
+      <select name="exam_id" class="form-select" required>
+        <option value="">— select an exam —</option>
+        {% for e in exams %}
+        <option value="{{ e.id }}">{{ e.course_code }} – {{ e.name }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label"><i class="bi bi-calendar me-1"></i>Date</label>
+      <input type="date" name="slot_date" class="form-control"
+             value="{{ slot.slot_date if slot else '' }}" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label"><i class="bi bi-clock me-1"></i>Start Time</label>
+      <input type="time" name="start_time" class="form-control"
+             value="{{ slot.start_time if slot else '' }}" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label"><i class="bi bi-clock-history me-1"></i>End Time</label>
+      <input type="time" name="end_time" class="form-control"
+             value="{{ slot.end_time if slot else '' }}" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label"><i class="bi bi-people me-1"></i>Capacity</label>
+      <input type="number" name="capacity" min="1" class="form-control"
+             value="{{ slot.capacity if slot else '' }}" placeholder="e.g. 10" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label"><i class="bi bi-geo-alt me-1"></i>Location</label>
+      <input name="location" class="form-control"
+             value="{{ slot.location if slot else '' }}" placeholder="e.g. Lab 3, Block B">
+    </div>
+  </div>
+  <div class="mt-4">
+    <button class="btn btn-primary px-4">
+      <i class="bi bi-check2-circle me-1"></i>{{ 'Save Changes' if slot else 'Create Slot' }}
+    </button>
+  </div>
+</form>
+
+{% endblock %}

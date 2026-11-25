@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% from '_m.html' import badge %}{% block title %}Bookings{% endblock %}
+{% block content %}
+
+<h2 class="page-heading mb-4"><i class="bi bi-ticket-perforated"></i> All Bookings</h2>
+
+<div class="table-wrapper">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Student</th>
+        <th>Roll No.</th>
+        <th>Examination</th>
+        <th>Examiner</th>
+        <th>Slot Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in bookings %}
+      <tr>
+        <td class="text-muted">{{ b.id }}</td>
+        <td>
+          <div class="fw-semibold">{{ b.student }}</div>
+          <div class="text-muted" style="font-size:0.80rem;">{{ b.student_email }}</div>
+        </td>
+        <td class="text-muted">{{ b.roll_no or '—' }}</td>
+        <td class="fw-semibold">{{ b.exam }}</td>
+        <td>{{ b.examiner }}</td>
+        <td>{{ b.slot_date }}</td>
+        <td class="text-muted">{{ b.start_time }}–{{ b.end_time }}</td>
+        <td>{{ badge(b.status) }}</td>
+        <td>
+          {% if b.status == 'Booked' %}
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.reschedule', bid=b.id) }}">
+            <i class="bi bi-arrow-left-right me-1"></i>Reschedule
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="text-center text-muted py-4">
+          <i class="bi bi-ticket-detailed d-block mb-2" style="font-size:2rem;"></i>
+          No bookings yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

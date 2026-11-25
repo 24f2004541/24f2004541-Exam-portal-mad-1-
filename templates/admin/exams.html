@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% from '_m.html' import badge %}{% block title %}Exams{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="page-heading mb-0"><i class="bi bi-clipboard-check"></i> Examinations</h2>
+  <a class="btn btn-primary" href="{{ url_for('admin.exam_form') }}">
+    <i class="bi bi-plus-lg me-1"></i> New Examination
+  </a>
+</div>
+
+<div class="table-wrapper">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Course</th>
+        <th>Examination Name</th>
+        <th>Type</th>
+        <th>Max Marks</th>
+        <th>Slot Window</th>
+        <th>Booking Window</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in exams %}
+      <tr>
+        <td class="text-muted">{{ e.id }}</td>
+        <td><span class="fw-semibold">{{ e.course_code }}</span></td>
+        <td>{{ e.name }}</td>
+        <td><span class="badge badge-slot">{{ e.exam_type }}</span></td>
+        <td>{{ e.max_marks }}</td>
+        <td class="text-muted" style="font-size:0.82rem;">{{ e.slot_start }} → {{ e.slot_end }}</td>
+        <td class="text-muted" style="font-size:0.82rem;">{{ e.book_start }} → {{ e.book_end }}</td>
+        <td>{{ badge(e.status) }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.exam_detail', eid=e.id) }}">
+            <i class="bi bi-gear me-1"></i>Manage
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="text-center text-muted py-4">
+          <i class="bi bi-clipboard-x d-block mb-2" style="font-size:2rem;"></i>
+          No examinations created yet. Click <strong>New Examination</strong> to get started.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}{% from '_m.html' import badge %}{% block title %}Slot Bookings{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="page-heading mb-1"><i class="bi bi-people"></i> Students in This Slot</h2>
+    <div class="text-muted" style="font-size:0.85rem;">
+      <i class="bi bi-calendar me-1"></i>{{ slot.slot_date }}
+      &nbsp;{{ slot.start_time }}–{{ slot.end_time }}
+      {% if slot.location %}&nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ slot.location }}{% endif %}
+      &nbsp;·&nbsp;{{ badge(slot.status) }}
+    </div>
+  </div>
+  <a href="{{ url_for('examiner.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<div class="table-wrapper">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Roll No.</th>
+        <th>Email</th>
+        <th>Booked On</th>
+        <th>Status</th>
+        <th>Score</th>
+        <th>Remarks</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="fw-semibold">{{ r.student }}</td>
+        <td class="text-muted">{{ r.roll_no or '—' }}</td>
+        <td class="text-muted">{{ r.email }}</td>
+        <td class="text-muted" style="font-size:0.82rem;">{{ r.booking_date }}</td>
+        <td>{{ badge(r.status) }}</td>
+        <td>
+          {% if r.total is not none %}
+          <span class="fw-bold text-primary">{{ '%g'|format(r.total) }}</span>
+          {% else %}
+          <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td class="text-muted" style="font-size:0.82rem; max-width:160px;">{{ r.remarks or '—' }}</td>
+        <td>
+          {% if r.status != 'Cancelled' %}
+          <a class="btn btn-sm btn-success" href="{{ url_for('examiner.evaluate', bid=r.id) }}">
+            <i class="bi bi-pencil-square me-1"></i>{{ 'Re-evaluate' if r.total is not none else 'Evaluate' }}
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+          <i class="bi bi-people d-block mb-2" style="font-size:2rem;"></i>
+          No students have booked this slot yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
